@@ -8,7 +8,7 @@
 
 <h2 align="left">About Me</h2>
 
-<p align="left">I have been creating insights since [year]. I am currently learning advanced data visualization techniques. My goal is to leverage data for impactful decision-making. In my free time, I enjoy [fun fact].</p>
+<p align="left">I have been creating insights since 2024. I am currently learning advanced data visualization techniques. My goal is to leverage data for impactful decision-making. In my free time, I enjoy [fun fact].</p>
 
 <h2 align="left">Skills</h2>
 
