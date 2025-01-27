@@ -1,39 +1,87 @@
+# Film Database Analysis
 
-# Hajar-Hasabala-2025
-## Data Analysis
+## Project Description
 
-<h1 align="left">Hello,</h1>
+This project focuses on analyzing the Sakila film database to extract meaningful insights about films, actors, and genres. By leveraging SQL queries, we aim to answer specific questions such as identifying films with the longest run times per rating, discovering the newest movies in various languages, and finding the top actors in the action and drama categories. This analysis can assist filmmakers, researchers, and movie enthusiasts in understanding trends and patterns within the film industry.
 
-<p align="left">My name is Hajar Hasabala, and I'm a Data Analyst.</p>
+## Queries
 
-<h2 align="left">About Me</h2>
+### 1. Longest Run Time by Rating
+This query retrieves the films with the longest run time for each rating.
 
-<p align="left">I have been creating insights since 2024. I am currently learning advanced data visualization techniques. My goal is to leverage data for impactful decision-making. In my free time.</p>
-
-<h2 align="left">Skills</h2>
-
-<div align="left">
-  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" height="40" alt="Python logo" />
-  <img width="12" />
-  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/sqlite/sqlite-original.svg" height="40" alt="SQLite logo" />
-  <img width="12" />
-  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mysql/mysql-original.svg" height="40" alt="MySQL logo" />
-  <img width="12" />
-  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/r/r-original.svg" height="40" alt="R logo" />
-  <img width="12" />
-  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/pandas/pandas-original.svg" height="40" alt="Pandas logo" />
-  <img width="12" />
-  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/excel/excel-original.svg" height="40" alt="Excel logo" />
-</div>
-
-<h2 align="left">Connect with Me</h2>
-
-<div align="left">
-  <img src="https://img.shields.io/static/v1?message=Instagram&logo=instagram&label=&color=E4405F&logoColor=white&labelColor=&style=for-the-badge" height="35" alt="Instagram logo" />
-  <img src="https://img.shields.io/static/v1?message=Twitch&logo=twitch&label=&color=9146FF&logoColor=white&labelColor=&style=for-the-badge" height="35" alt="Twitch logo" />
-  <img src="https://img.shields.io/static/v1?message=Discord&logo=discord&label=&color=7289DA&logoColor=white&labelColor=&style=for-the-badge" height="35" alt="Discord logo" />
-  <img src="https://img.shields.io/static/v1?message=Gmail&logo=gmail&label=&color=D14836&logoColor=white&labelColor=&style=for-the-badge" height="35" alt="Gmail logo" />
-  <img src="https://img.shields.io/static/v1?message=LinkedIn&logo=linkedin&label=&color=0077B5&logoColor=white&labelColor=&style=for-the-badge" height="35" alt="LinkedIn logo" />
-</div>
-
-<img src="https://raw.githubusercontent.com/maurodesou
+```sql
+SELECT film_id, length AS runtime, rating, title AS film_title
+FROM sakila.film f
+WHERE f.length = (
+    SELECT MAX(f2.length)
+    FROM sakila.film f2
+    WHERE f2.rating = f.rating
+);
+SELECT f.film_id, f.title, f.release_year, l.last_update, l.name
+FROM sakila.film f
+JOIN sakila.language l ON f.language_id = l.language_id 
+WHERE f.release_year = (
+    SELECT MAX(f2.release_year)
+    FROM sakila.film f2
+    WHERE l.language_id = f.language_id
+);
+SELECT 
+    o.first_name, 
+    o.last_name,
+    COUNT(fa.film_id) AS film_count
+FROM 
+    sakila.actor o
+JOIN
+    sakila.film_actor fa ON o.actor_id = fa.actor_id
+JOIN
+    sakila.film_category fc ON fa.film_id = fc.film_id
+JOIN
+    sakila.category c ON fc.category_id = c.category_id
+WHERE
+    c.name IN ('Action', 'Drama') 
+GROUP BY
+    o.actor_id, o.first_name, o.last_name
+ORDER BY
+    film_count DESC
+LIMIT 5;
+SELECT 
+    c.name AS genre_name,
+    COUNT(fc.film_id) AS film_count
+FROM 
+    sakila.film_category fc
+JOIN 
+    sakila.category c ON fc.category_id = c.category_id
+GROUP BY 
+    c.name
+ORDER BY 
+    film_count DESC
+LIMIT 1;
+WITH most_common_genre AS (
+    SELECT 
+        c.name AS genre_name,
+        COUNT(fc.film_id) AS film_count
+    FROM 
+        sakila.film_category fc
+    JOIN 
+        sakila.category c ON fc.category_id = c.category_id
+    GROUP BY 
+        c.name
+    ORDER BY 
+        film_count DESC
+    LIMIT 1
+)
+SELECT 
+    f.title,
+    f.rental_rate
+FROM 
+    sakila.film f
+JOIN 
+    sakila.film_category fc ON f.film_id = fc.film_id
+JOIN 
+    sakila.category c ON fc.category_id = c.category_id
+JOIN 
+    most_common_genre mcg ON c.name = mcg.genre_name
+ORDER BY 
+    f.rental_rate DESC
+LIMIT 3;
+Feel free to adjust any section to better suit your needs!
